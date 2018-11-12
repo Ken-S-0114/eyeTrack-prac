@@ -27,8 +27,16 @@ XLM: GD263F3X5D5ULX7TBXF6ULPGKEICAHJEO22ZOJABNVJSCYPEJW6JBU7G
 */
 
 import gazetrack.*;
+import oscP5.*;
+import netP5.*;
 
 GazeTrack gazeTrack;
+OscP5 oscP5;
+NetAddress myRemoteLocation;
+
+int receivePort = 12002;
+String sendIP = "127.0.0.1";
+int sendPort = 12001;
 
 PShape eye_pic;
 
@@ -36,43 +44,38 @@ void setup()
 {
   fullScreen();
   
-  eye_pic = loadShape("eye.svg");
-    
+  // Gaze cursor param.
+  noFill();
+  stroke(50, 100);
+  strokeWeight(4);
+  
   gazeTrack = new GazeTrack(this);
   
   // If the TobiiStream.exe asked you to use a 
   // different socket port (e.g., 5656), use this instead:
   // gazeTrack = new GazeTrack(this, "5656");
   
+  oscP5 = new OscP5(this, receivePort);
+  
+  myRemoteLocation = new NetAddress(sendIP, sendPort);
 }
 
 void draw() 
 {
   background(255);
   
-  // Draws the left eye if present
-  if (gazeTrack.leftEyePresent())
+  if (gazeTrack.gazePresent())
   {
-    float eye_size = 50 / gazeTrack.getLeftEyeNormZ();
+    OscMessage gazeData = new OscMessage("/test");
     
-    shape(eye_pic, gazeTrack.getLeftEyeX(), gazeTrack.getLeftEyeY(), eye_size, eye_size);
+    ellipse(gazeTrack.getGazeX(), gazeTrack.getGazeY(), 80, 80);
     
-    println("Left eye is present:");
-    println("X: " + gazeTrack.getLeftEyeXmm() + "mm from the center of the screen");
-    println("Y: " + gazeTrack.getLeftEyeYmm() + "mm from the center of the screen");
-    println();
-  }
-  
-  // Draws the right eye if present
-  if (gazeTrack.rightEyePresent())
-  {
-    float eye_size = 50 / gazeTrack.getRightEyeNormZ();
-    
-    shape(eye_pic, gazeTrack.getRightEyeX(), gazeTrack.getRightEyeY(), eye_size, eye_size);
-    
-    println("Right eye is present:");
-    println("X: " + gazeTrack.getRightEyeXmm() + "mm from the center of the screen");
-    println("Y: " + gazeTrack.getRightEyeYmm() + "mm from the center of the screen");
-    println();
+    // Print the tracker's timestamp for the gaze cursor above
+    println("Latest gaze data at: " + gazeTrack.getTimestamp());
+    println("X: " + gazeTrack.getGazeX() );
+    println("Y: " + gazeTrack.getGazeY() );
+    gazeData.add(gazeTrack.getGazeX());
+    gazeData.add(gazeTrack.getGazeY());
+    oscP5.send(gazeData, myRemoteLocation);
   }
 }
