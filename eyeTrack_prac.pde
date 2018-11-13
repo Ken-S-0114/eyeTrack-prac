@@ -34,15 +34,16 @@ GazeTrack gazeTrack;
 OscP5 oscP5;
 NetAddress myRemoteLocation;
 
-int receivePort = 12002;
+int receivePort = 8000;
 String sendIP = "127.0.0.1";
-int sendPort = 12001;
+int sendPort = 1234;
 
 PShape eye_pic;
 
 void setup() 
 {
   fullScreen();
+  frameRate(60);
   
   // Gaze cursor param.
   noFill();
@@ -55,9 +56,9 @@ void setup()
   // different socket port (e.g., 5656), use this instead:
   // gazeTrack = new GazeTrack(this, "5656");
   
-  oscP5 = new OscP5(this, receivePort);
+  oscP5 = new OscP5(this, sendPort);
   
-  myRemoteLocation = new NetAddress(sendIP, sendPort);
+  myRemoteLocation = new NetAddress(sendIP, receivePort);
 }
 
 void draw() 
@@ -66,7 +67,7 @@ void draw()
   
   if (gazeTrack.gazePresent())
   {
-    OscMessage gazeData = new OscMessage("/test");
+    OscMessage gazeData = new OscMessage("/eyeGaze");
     
     ellipse(gazeTrack.getGazeX(), gazeTrack.getGazeY(), 80, 80);
     
