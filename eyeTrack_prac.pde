@@ -65,6 +65,7 @@ void draw()
 {
   background(255);
   
+  delay(100);
   if (gazeTrack.gazePresent())
   {
     OscMessage gazeData = new OscMessage("/eyeGaze");
